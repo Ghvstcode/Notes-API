@@ -1,11 +1,15 @@
 package models
 
 import (
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
-	"os"
-	"strings"
+
+	u "github.com/GhvstCode/Notes-API/utils"
 )
 
 type Token struct {
@@ -36,22 +40,29 @@ func (ua *UserAccount) Validate() (map[string]interface{}, bool) {
 
 //Check to see if Email is valid
 	if !strings.Contains(ua.Email, "@") {
+		fmt.Println("err1")
 		return u.Message(false, "Please provide a valid email address"), false
 	}
 //Check to see if password is valid!
 	if len(ua.Password) < 6 {
+
+		fmt.Println("err2")
 		return u.Message(false, "Password is required"), false
 	}
 //Check to see if password is secure
-	if strings.Contains(ua.password, "abcdefg") {
+	if strings.Contains(ua.Password, "abcdefg") {
+
+		fmt.Println("err3")
 		return u.Message(false, "Please provide a valid password"), false
 	}
 //Check to see if Email is unique
 	temp := &UserAccount{}
 
 	//check for errors and duplicate emails
-	err := GetDB().Table("User").Where("email = ?", account.Email).First(temp).Error
+	err := GetDB().Table("UserAccount").Where("email = ?", ua.Email).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
+		//log.Fatal(err)
+		fmt.Print("Hello", err)
 		return u.Message(false, "Connection error. Please retry"), false
 	}
 	if temp.Email != "" {
@@ -65,19 +76,22 @@ func (ua *UserAccount) Validate() (map[string]interface{}, bool) {
 func (ua *UserAccount) Create() (map[string]interface{}, bool){
 //Check if the values provided are valid
 	if resp, b := ua.Validate(); !b {
+
+		fmt.Println("err4")
 		return resp, false
 	}
 
 //Hash the password!
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(ua.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return u.message(false, "An error occurred! Unable to save user"), false
+		return u.Message(false, "An error occurred! Unable to save user"), false
 	}
 
 	ua.Password = string(hashedPassword)
 	GetDB().Create(ua)
 
 	if ua.ID <= 0 {
+		fmt.Print("Na me")
 		return u.Message(false, "Failed to create account, connection error."), false
 	}
 
