@@ -40,26 +40,21 @@ func (ua *UserAccount) Validate() (map[string]interface{}, bool) {
 
 //Check to see if Email is valid
 	if !strings.Contains(ua.Email, "@") {
-		fmt.Println("err1")
 		return u.Message(false, "Please provide a valid email address"), false
 	}
 //Check to see if password is valid!
 	if len(ua.Password) < 6 {
-
-		fmt.Println("err2")
 		return u.Message(false, "Password is required"), false
 	}
 //Check to see if password is secure
 	if strings.Contains(ua.Password, "abcdefg") {
-
-		fmt.Println("err3")
 		return u.Message(false, "Please provide a valid password"), false
 	}
 //Check to see if Email is unique
 	temp := &UserAccount{}
 
 	//check for errors and duplicate emails
-	err := GetDB().Table("UserAccount").Where("email = ?", ua.Email).First(temp).Error
+	err := GetDB().Table("user_accounts").Where("email = ?", ua.Email).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		//log.Fatal(err)
 		fmt.Print("Hello", err)
@@ -76,8 +71,6 @@ func (ua *UserAccount) Validate() (map[string]interface{}, bool) {
 func (ua *UserAccount) Create() (map[string]interface{}, bool){
 //Check if the values provided are valid
 	if resp, b := ua.Validate(); !b {
-
-		fmt.Println("err4")
 		return resp, false
 	}
 

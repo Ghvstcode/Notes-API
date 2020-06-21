@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/GhvstCode/Notes-API/models"
@@ -17,7 +16,6 @@ func NewUser(w http.ResponseWriter, r *http.Request){
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
 		//fill the message util and send back the error!
-		fmt.Println("err5", err)
 		u.RespondJson(w, u.Message(false, "Invalid request"))
 		return
 	}
