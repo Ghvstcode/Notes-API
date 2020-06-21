@@ -20,7 +20,7 @@ func NewUser(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	//-create account by calling create method on the model and send back to the client
-	res, _ := user.Create()
+	res:= user.Create()
 	u.RespondJson(w, res)
 }
 
@@ -33,4 +33,21 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 	}
     res := models.Login(user.Email, user.Password)
     u.RespondJson(w, res)
+}
+
+func UpdateUser(w http.ResponseWriter, r *http.Request){
+	userID := r.Context().Value("user").(uint)
+	user :=&models.UserAccount{}
+
+	err := json.NewDecoder(r.Body).Decode(user)
+	if err != nil {
+		u.RespondJson(w, u.Message(false, "Invalid request"))
+		return
+	}
+
+	updatedUser := user.Update(userID)
+	u.RespondJson(w, updatedUser)
+	//We search for the ID of that user,
+	//We update provided fields &  store it in the DB
+	//If provided field is the password, we would want to hash it before saving!
 }
