@@ -23,3 +23,14 @@ func NewUser(w http.ResponseWriter, r *http.Request){
 	res, _ := user.Create()
 	u.RespondJson(w, res)
 }
+
+func LoginUser(w http.ResponseWriter, r *http.Request){
+	user := &models.UserAccount{}
+	err := json.NewDecoder(r.Body).Decode(user)
+	if err != nil {
+		u.RespondJson(w, u.Message(false, "Invalid request"))
+		return
+	}
+    res := models.Login(user.Email, user.Password)
+    u.RespondJson(w, res)
+}

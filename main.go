@@ -14,8 +14,8 @@ func handleRequest(){
 
 	//Create a new User
 	r.HandleFunc("/api/user/new", controllers.NewUser).Methods("POST")
-	////Login a User
-	//r.HandleFunc("/api/user/login", createNewArticle).Methods("POST")
+	//Login a User
+	r.HandleFunc("/api/user/login", controllers.LoginUser).Methods("POST")
 	////Update a User's info, user provides ID of note they wish to have updated
 	//r.HandleFunc("/article/{id}", updateArticle).Methods("PUT")
 	////Delete a note
