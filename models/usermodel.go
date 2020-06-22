@@ -18,7 +18,7 @@ type Token struct {
 	jwt.StandardClaims
 }
 
-//a struct to rep user account
+//a struct to represent a User
 type UserAccount struct {
 	gorm.Model
 	Name string `json:"name"`
