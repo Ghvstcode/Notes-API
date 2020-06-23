@@ -2,7 +2,6 @@ package Auth
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -69,7 +68,6 @@ import (
 			return
 		}
 
-		fmt.Sprintf("User %", tk.UserId)
 		ctx := context.WithValue(r.Context(), "user", tk.UserId)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)

@@ -26,9 +26,9 @@ func init() {
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(&UserAccount{})
+	db.Debug().AutoMigrate(&UserAccount{}, &Note{})
 
-	fmt.Print(db.HasTable("user_accounts"))
+	fmt.Print(db.HasTable("notes"))
 }
 
 func GetDB() *gorm.DB {

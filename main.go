@@ -23,12 +23,13 @@ func handleRequest(){
 	//r.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
    //
    //
-	////Return all a users article
-	//r.HandleFunc("/articles", returnAllArticles)
-   ////Create a new article
-	//r.HandleFunc("/newarticle", createNewArticle).Methods("POST")
-	////Update a note, user provides ID of note they wish to have updated
-	//r.HandleFunc("/article/{id}", updateArticle).Methods("PUT")
+
+	//Create a new Note
+	r.HandleFunc("/api/notes/new", controllers.NewNote).Methods("POST")
+	//Return all a users Notes
+	r.HandleFunc("/api/notes/GetNotes", controllers.GetAllNotes).Methods("GET")
+	//Update a note, user provides ID of note they wish to have updated
+	r.HandleFunc("/api/notes/{id}", controllers.UpdateNote).Methods("PUT")
 	////Delete a note
 	//r.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
 	////Search for a note by its ID.
@@ -40,6 +41,3 @@ func handleRequest(){
 func main(){
 	handleRequest()
 }
-
-//"Authorization: Bearer {ACCESS_TOKEN}"
-//curl -X PUT -H "Content-Type: application/json" "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjJ9.6KwkH6ycpEbtdfZuM1N_m8E_W1UhQ5cV_SMRrqvAO40" -d '{"name":"aupdated","email":"aupdated@gmail.com"}' http://localhost:8080/api/user/update
