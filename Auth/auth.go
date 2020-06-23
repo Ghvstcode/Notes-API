@@ -29,7 +29,7 @@ import (
 		tokenHeader := r.Header.Get("Authorization")
 
 		if tokenHeader == "" {
-			res = utils.Message(false, "Missing auth token")
+			res = utils.Message(false, "Missing auth token", http.StatusUnauthorized)
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			utils.RespondJson(w, res)
@@ -38,7 +38,7 @@ import (
 
 		tArray := strings.Split(tokenHeader, " ")
 		if len(tArray) != 2 {
-			res = utils.Message(false, "Invalid/Malformed auth token")
+			res = utils.Message(false, "Invalid/Malformed auth token", http.StatusBadRequest)
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			utils.RespondJson(w, res)
@@ -53,7 +53,7 @@ import (
 		})
 
 		if err != nil { //Malformed token, returns with http code 403 as usual
-			res = utils.Message(false, "Malformed authentication token")
+			res = utils.Message(false, "Malformed authentication token", http.StatusBadRequest)
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			utils.RespondJson(w, res)
@@ -61,7 +61,7 @@ import (
 		}
 
 		if !token.Valid { //Token is invalid, maybe not signed on this server
-			res = utils.Message(false, "Token is not valid.")
+			res = utils.Message(false, "Token is not valid.", http.StatusBadRequest)
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			utils.RespondJson(w, res)

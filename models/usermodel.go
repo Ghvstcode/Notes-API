@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -44,15 +44,15 @@ func Hash(password string) ([]byte, error) {
 //Function for validating a new user before saving
 func (ua *UserAccount) Validate() (map[string]interface{}, bool) {
 		if !strings.Contains(ua.Email, "@") {
-			return u.Message(false, "Please provide a valid email address"), false
+			return u.Message(false, "Please provide a valid email address", http.StatusBadRequest), false
 		}
 		//Check to see if password is valid!
 		if len(ua.Password) < 6 {
-			return u.Message(false, "Password is required"), false
+			return u.Message(false, "Password is required", http.StatusBadRequest), false
 		}
 		//Check to see if password is secure
 		if strings.Contains(ua.Password, "abcdefg") {
-			return u.Message(false, "Please provide a valid password"), false
+			return u.Message(false, "Please provide a valid password", http.StatusBadRequest), false
 		}
 		//Check to see if Email is unique
 		temp := &UserAccount{}
@@ -62,13 +62,13 @@ func (ua *UserAccount) Validate() (map[string]interface{}, bool) {
 		if err != nil && err != gorm.ErrRecordNotFound {
 			//log.Fatal(err)
 			fmt.Print("Hello", err)
-			return u.Message(false, "Connection error. Please retry"), false
+			return u.Message(false, "Connection error. Please retry", http.StatusBadGateway), false
 		}
 		if temp.Email != "" {
-			return u.Message(false, "Email address already in use by another user."), false
+			return u.Message(false, "Email address already in use by another user.", http.StatusBadRequest), false
 		}
 
-	return u.Message(true, "Validated"), true
+	return u.Message(true, "Validated", http.StatusCreated), true
 
 }
 
@@ -82,7 +82,7 @@ func (ua *UserAccount) Create() map[string]interface{}{
 //Hash the password!
 	hashedPassword, err := Hash(ua.Password)
 	if err != nil {
-		return u.Message(false, "An error occurred! Unable to save user")
+		return u.Message(false, "An error occurred! Unable to save user", http.StatusInternalServerError)
 	}
 
 	ua.Password = string(hashedPassword)
@@ -90,18 +90,18 @@ func (ua *UserAccount) Create() map[string]interface{}{
 
 	if ua.ID <= 0 {
 		fmt.Print("Na me")
-		return u.Message(false, "Failed to create account, connection error.")
+		return u.Message(false, "Failed to create account, connection error.", http.StatusInternalServerError)
 	}
 
 	 t, e := genAuthToken(ua)
 	if e != nil {
-		return u.Message(false, "Failed to create account, connection error.")
+		return u.Message(false, "Failed to create account, connection error.", http.StatusBadGateway)
 	}
 
 	ua.Token = t
 	ua.Password = ""
 
-	response := u.Message(true, "Account has been created")
+	response := u.Message(true, "Account has been created", http.StatusCreated)
 	response["account"] = ua
 	return response
 }
@@ -111,22 +111,22 @@ func Login(email string,  password string) map[string]interface{} {
 	err := GetDB().Table("user_accounts").Where("email = ?", email).First(user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return u.Message(false, "Email address not found")
+			return u.Message(false, "Email address not found", http.StatusBadRequest)
 		}
-		return u.Message(false, "Connection error. Please retry")
+		return u.Message(false, "Connection error. Please retry", http.StatusInternalServerError)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return u.Message(false, "Invalid login credentials. Please try again")
+		return u.Message(false, "Invalid login credentials. Please try again", http.StatusUnauthorized)
 	}
 	user.Password = ""
 
 	token, _ := genAuthToken(user)
 	user.Token = token
 
-	resp := u.Message(true, "Logged In")
+	resp := u.Message(true, "Logged In", http.StatusAccepted)
 	resp["account"] = user
 	return resp
 }
@@ -135,7 +135,7 @@ func (ua *UserAccount)Update(userID uint) map[string]interface{} {
 	//Hash the password!
 	hashedPassword, err := Hash(ua.Password)
 	if err != nil {
-		return u.Message(false, "An error occurred! Unable to save user")
+		return u.Message(false, "An error occurred! Unable to save user", http.StatusInternalServerError)
 	}
 
 	ua.Password = string(hashedPassword)
@@ -149,11 +149,10 @@ func (ua *UserAccount)Update(userID uint) map[string]interface{} {
 	)
 
 	if db.Error != nil {
-		log.Fatal(db.Error)
-		return u.Message(false, "An Error occurred")
+		return u.Message(false, "An Error occurred", http.StatusInternalServerError)
 	}
 	ua.Password = ""
-	response := u.Message(true, "User has been updated")
+	response := u.Message(true, "User has been updated", http.StatusOK)
 	response["account"] = ua
 	return response
 }

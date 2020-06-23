@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"log"
+	"net/http"
 
 	"github.com/jinzhu/gorm"
 
@@ -20,29 +20,29 @@ type Note struct {
 
 func (n *Note) Validate()(map[string]interface{}, bool){
 	if len(n.Title) < 0 {
-		return u.Message(false, "Note must contain title"), false
+		return u.Message(false, "Note must contain title", http.StatusUnauthorized), false
 	}
 
 	if len(n.Content) < 0 {
-		return u.Message(false, "Note must contain content"), false
+		return u.Message(false, "Note must contain content", http.StatusUnauthorized), false
 	}
 
 	if n.UserID <= 0 {
-		return u.Message(false, "unauthorized access"), false
+		return u.Message(false, "unauthorized access", http.StatusUnauthorized), false
 	}
-	return u.Message(true, "Validated"), true
+	return u.Message(true, "Validated", http.StatusOK), false
 }
 
 func (n *Note) Create() map[string]interface{} {
 
 	if resp, ok := n.Validate(); !ok {
-		resp = u.Message(false, "An Error occurred!")
+		resp = u.Message(false, "An Error occurred!", http.StatusUnauthorized)
 		return resp
 	}
 
 	GetDB().Create(n)
 
-	resp := u.Message(true, "success")
+	resp := u.Message(true, "success", http.StatusCreated)
 	resp["note"] = n
 	return resp
 
@@ -61,7 +61,7 @@ func GetNotes(id uint) []*Note {
 
 func (n *Note)Update(noteID uint) map[string]interface{} {
 	if resp, ok := n.Validate(); !ok {
-		resp = u.Message(false, "An Error occurred!")
+		resp = u.Message(false, "An Error occurred!", http.StatusUnauthorized)
 		return resp
 	}
 	db = GetDB().Debug().Model(&Note{}).Where("ID = ?", noteID).Take(&Note{}).UpdateColumns(
@@ -73,10 +73,9 @@ func (n *Note)Update(noteID uint) map[string]interface{} {
 	)
 	n.ID = noteID
 	if db.Error != nil {
-		log.Fatal(db.Error)
-		return u.Message(false, "An Error occurred")
+		return u.Message(false, "An Error occurred", http.StatusInternalServerError)
 	}
-	response := u.Message(true, "User has been updated")
+	response := u.Message(true, "User has been updated", http.StatusOK)
 	response["account"] = n
 	return response
 }
@@ -85,10 +84,10 @@ func (n *Note) DeleteNote(uid uint32) map[string]interface{} {
 	db = GetDB().Debug().Model(&Note{}).Where("id = ?", uid).Take(&Note{}).Delete(&Note{})
 
 	if db.Error != nil {
-		return u.Message(true, "Note has been deleted")
+		return u.Message(false, "Unable to delete Note", http.StatusInternalServerError)
 	}
 
-	response := u.Message(true, "Note has been deleted")
+	response := u.Message(true, "Note has been deleted", http.StatusOK)
 	response["Data"] = &Note{}
 	return response
 }

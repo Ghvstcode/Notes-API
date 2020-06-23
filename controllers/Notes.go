@@ -18,7 +18,7 @@ func NewNote(w http.ResponseWriter, r *http.Request){
 
 	err := json.NewDecoder(r.Body).Decode(note)
 	if err != nil {
-		u.RespondJson(w, u.Message(false, "An Error occurred"))
+		u.RespondJson(w, u.Message(false, "An Error occurred", http.StatusBadRequest))
 		return
 	}
 
@@ -30,7 +30,7 @@ func NewNote(w http.ResponseWriter, r *http.Request){
 func GetAllNotes(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("user").(uint)
 	data := models.GetNotes(id)
-	resp := u.Message(true, "success")
+	resp := u.Message(true, "success", http.StatusOK)
 	resp["data"] = data
 	u.RespondJson(w, resp)
 }
@@ -43,13 +43,13 @@ func UpdateNote(w http.ResponseWriter, r *http.Request){
 
 	err := json.NewDecoder(r.Body).Decode(note)
 	if err != nil {
-		u.RespondJson(w, u.Message(false, "Invalid request"))
+		u.RespondJson(w, u.Message(false, "Invalid request", http.StatusBadRequest))
 		return
 	}
 
 	i, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		u.RespondJson(w, u.Message(false, " An Error Occurred"))
+		u.RespondJson(w, u.Message(false, " An Error Occurred", http.StatusInternalServerError))
 		return
 	}
 	updatedNote := note.Update(uint(i))
@@ -64,13 +64,13 @@ func DeleteNote(w http.ResponseWriter, r *http.Request){
 
 	err := json.NewDecoder(r.Body).Decode(note)
 	if err != nil {
-		u.RespondJson(w, u.Message(false, "Invalid request"))
+		u.RespondJson(w, u.Message(false, "Invalid request", http.StatusBadRequest))
 		return
 	}
 
 	i, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		u.RespondJson(w, u.Message(false, " An Error Occurred"))
+		u.RespondJson(w, u.Message(false, " An Error Occurred", http.StatusInternalServerError))
 		return
 	}
 	DeletedNote := note.DeleteNote(uint32(i))
