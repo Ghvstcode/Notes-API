@@ -80,3 +80,15 @@ func (n *Note)Update(noteID uint) map[string]interface{} {
 	response["account"] = n
 	return response
 }
+
+func (n *Note) DeleteNote(uid uint32) map[string]interface{} {
+	db = GetDB().Debug().Model(&Note{}).Where("id = ?", uid).Take(&Note{}).Delete(&Note{})
+
+	if db.Error != nil {
+		return u.Message(true, "Note has been deleted")
+	}
+
+	response := u.Message(true, "Note has been deleted")
+	response["Data"] = &Note{}
+	return response
+}

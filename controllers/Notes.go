@@ -36,7 +36,6 @@ func GetAllNotes(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateNote(w http.ResponseWriter, r *http.Request){
-	userID := r.Context().Value("user").(uint)
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -53,7 +52,27 @@ func UpdateNote(w http.ResponseWriter, r *http.Request){
 		u.RespondJson(w, u.Message(false, " An Error Occurred"))
 		return
 	}
-	note.UserID = userID
 	updatedNote := note.Update(uint(i))
 	u.RespondJson(w, updatedNote)
+}
+
+func DeleteNote(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	note :=&models.Note{}
+
+	err := json.NewDecoder(r.Body).Decode(note)
+	if err != nil {
+		u.RespondJson(w, u.Message(false, "Invalid request"))
+		return
+	}
+
+	i, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		u.RespondJson(w, u.Message(false, " An Error Occurred"))
+		return
+	}
+	DeletedNote := note.DeleteNote(uint32(i))
+	u.RespondJson(w, DeletedNote)
 }

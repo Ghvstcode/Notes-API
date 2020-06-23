@@ -19,21 +19,15 @@ func handleRequest(){
 	r.HandleFunc("/api/user/login", controllers.LoginUser).Methods("POST")
 	//Update a User's info,
 	r.HandleFunc("/api/user/update", controllers.UpdateUser).Methods("PUT")
-	////Delete a note
-	//r.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
-   //
-   //
-
 	//Create a new Note
 	r.HandleFunc("/api/notes/new", controllers.NewNote).Methods("POST")
 	//Return all a users Notes
 	r.HandleFunc("/api/notes/GetNotes", controllers.GetAllNotes).Methods("GET")
 	//Update a note, user provides ID of note they wish to have updated
 	r.HandleFunc("/api/notes/{id}", controllers.UpdateNote).Methods("PUT")
-	////Delete a note
-	//r.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
-	////Search for a note by its ID.
-	//r.HandleFunc("/article/{id}", returnSingleArticle)
+	//Delete a note
+	r.HandleFunc("/api/notes/{id}", controllers.DeleteNote).Methods("DELETE")
+
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
